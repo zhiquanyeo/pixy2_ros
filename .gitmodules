@@ -1,0 +1,3 @@
+[submodule "pixy2_node/pixy2"]
+	path = pixy2_node/pixy2
+	url = https://github.com/charmedlabs/pixy2
