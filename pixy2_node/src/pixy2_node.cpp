@@ -4,6 +4,9 @@
 
 #include "libpixyusb2.h"
 
+#define DEFAULT_MAX_RETRIES 10
+#define DEFAULT_RETRY_DURATION 10.0
+
 class Pixy2Node
 {
 public:
@@ -45,10 +48,31 @@ Pixy2Node::Pixy2Node() :
         //servo_subscriber_ = node_handle_.subscribe("servo_cmd", 20, &Pixy2Node::setServo, this);
     }
 
-    int ret = pixy.init();
-    if (ret != 0) {
-        ROS_FATAL("Pixy2Node - %s - Failed to open with USB error %d!", __FUNCTION__, ret);
-        ROS_BREAK();
+    double retryWaitTime;
+    int maxRetries;
+
+    private_node_handle_.param("maxRetries", maxRetries, DEFAULT_MAX_RETRIES);
+    private_node_handle_.param("retryWaitTime", retryWaitTime, DEFAULT_RETRY_DURATION);
+
+    int ret;
+    int numTries = 0;
+    while ((ret = pixy.init()) != 0 && ros::ok()) {
+        numTries++;
+        if (numTries > 10) {
+            ROS_FATAL("Could not connect at all and reached max retries");
+            ROS_BREAK();;
+            break;
+        }
+
+        if (numTries == 1) {
+            ROS_INFO("Will retry a maximum of %d times, waiting %f each time", maxRetries, retryWaitTime);
+        }
+
+        ROS_WARN("Attempt %d/%d failed. Retrying in %f seconds", numTries, maxRetries, retryWaitTime);
+
+        if (numTries < 10) {
+            ros::Duration(retryWaitTime).sleep();
+        }
     }
 
     publisher_ = node_handle_.advertise<pixy2_msgs::PixyData>("block_data", 50.0);
