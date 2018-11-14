@@ -106,6 +106,8 @@ void Pixy2Node::update()
             pixy_block.roi.width = raw_block.m_width;
             pixy_block.roi.height = raw_block.m_height;
             pixy_block.roi.do_rectify = false;
+            pixy_block.index = raw_block.m_index;
+            pixy_block.age = raw_block.m_age;
 
             pixy_block.angle = (pixy_block.type == pixy2_msgs::PixyBlock::COLOR_CODE) ?
                                 raw_block.m_angle : 0.0;
