@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <pixy2_msgs/PixyData.h>
 #include <pixy2_msgs/PixyBlock.h>
+#include <pixy2_msgs/Servo.h>
 
 #include "libpixyusb2.h"
 
@@ -14,12 +15,12 @@ public:
     void spin();
 private:
     void update();
+    void setServo(const pixy2_msgs::Servo& msg);
 
     ros::NodeHandle node_handle_;
     ros::NodeHandle private_node_handle_;
 
     ros::Rate rate_;
-    //tf::TransformBroadcaster td_broadcaster_;
 
     ros::Publisher publisher_;
     ros::Subscriber servo_subscriber_;
@@ -28,6 +29,8 @@ private:
     bool use_servos_;
 
     Pixy2 pixy;
+
+    uint16_t servoPositions[2] = {PIXY_RCS_CENTER_POS, PIXY_RCS_CENTER_POS};
 };
 
 Pixy2Node::Pixy2Node() :
@@ -45,7 +48,7 @@ Pixy2Node::Pixy2Node() :
     private_node_handle_.param("use_servos", use_servos_, false);
 
     if (use_servos_) {
-        //servo_subscriber_ = node_handle_.subscribe("servo_cmd", 20, &Pixy2Node::setServo, this);
+        servo_subscriber_ = node_handle_.subscribe("servo_cmd", 20, &Pixy2Node::setServo, this);
     }
 
     double retryWaitTime;
@@ -121,6 +124,17 @@ void Pixy2Node::update()
     }
 
     publisher_.publish(data);
+}
+
+void Pixy2Node::setServo(const pixy2_msgs::Servo& msg)
+{
+    if(msg.channel < 0 || msg.channel > 1) {
+        return;
+    }
+
+    servoPositions[msg.channel] = msg.position;
+
+    pixy.setServos(servoPositions[0], servoPositions[1]);
 }
 
 void Pixy2Node::spin()
