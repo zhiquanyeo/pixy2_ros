@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <pixy2_msgs/PixyData.h>
 #include <pixy2_msgs/PixyBlock.h>
+#include <pixy2_msgs/PixyResolution.h>
 #include <pixy2_msgs/Servo.h>
 
 #include "libpixyusb2.h"
@@ -25,6 +26,8 @@ private:
     ros::Publisher publisher_;
     ros::Subscriber servo_subscriber_;
     std::string frame_id;
+
+    ros::Publisher constantsPublisher_;
 
     bool use_servos_;
 
@@ -79,6 +82,14 @@ Pixy2Node::Pixy2Node() :
     }
 
     publisher_ = node_handle_.advertise<pixy2_msgs::PixyData>("block_data", 50.0);
+    constantsPublisher_ = node_handle_.advertise<pixy2_msgs::PixyResolution>("pixy2_resolution", 5, true);
+
+    // Publish the resolution message
+    pixy2_msgs::PixyResolution resolution;
+    resolution.width = pixy.frameWidth;
+    resolution.height = pixy.frameHeight;
+
+    constantsPublisher_.publish(resolution);
 }
 
 void Pixy2Node::update()
