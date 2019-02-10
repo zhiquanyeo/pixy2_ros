@@ -35,3 +35,4 @@ Must be run as `root` if udev rules have not been installed.
 `~use_servos` (bool, default: true)  
 `~maxRetries` (int, default: 10)  
 `~retryWaitTime` (float, default: 10.0)  
+`~enable_lamp`(bool, default: false)

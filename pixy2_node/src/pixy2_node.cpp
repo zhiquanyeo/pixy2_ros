@@ -81,6 +81,15 @@ Pixy2Node::Pixy2Node() :
         }
     }
 
+    bool enable_lamp;
+    private_node_handle_.param("enable_lamp", enable_lamp, false);
+
+    if (enable_lamp) {
+        pixy.setLamp(1,0);
+    } else {
+        pixy.setLamp(0,0);
+    }
+
     publisher_ = node_handle_.advertise<pixy2_msgs::PixyData>("block_data", 50.0);
     constantsPublisher_ = node_handle_.advertise<pixy2_msgs::PixyResolution>("pixy2_resolution", 5, true);
 
