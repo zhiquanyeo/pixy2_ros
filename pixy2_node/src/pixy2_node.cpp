@@ -90,7 +90,10 @@ Pixy2Node::Pixy2Node() :
         pixy.setLamp(0,0);
     }
 
-    publisher_ = node_handle_.advertise<pixy2_msgs::PixyData>("block_data", 50.0);
+    int queue_size;
+    private_node_handle_.param("queue_size", queue_size, 50);
+    
+    publisher_ = node_handle_.advertise<pixy2_msgs::PixyData>("block_data", queue_size);
     constantsPublisher_ = node_handle_.advertise<pixy2_msgs::PixyResolution>("pixy2_resolution", 5, true);
 
     // Publish the resolution message
