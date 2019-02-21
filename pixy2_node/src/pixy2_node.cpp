@@ -81,7 +81,19 @@ Pixy2Node::Pixy2Node() :
         }
     }
 
-    publisher_ = node_handle_.advertise<pixy2_msgs::PixyData>("block_data", 50.0);
+    bool enable_lamp;
+    private_node_handle_.param("enable_lamp", enable_lamp, false);
+
+    if (enable_lamp) {
+        pixy.setLamp(1,0);
+    } else {
+        pixy.setLamp(0,0);
+    }
+
+    int queue_size;
+    private_node_handle_.param("queue_size", queue_size, 50);
+    
+    publisher_ = node_handle_.advertise<pixy2_msgs::PixyData>("block_data", queue_size);
     constantsPublisher_ = node_handle_.advertise<pixy2_msgs::PixyResolution>("pixy2_resolution", 5, true);
 
     // Publish the resolution message
